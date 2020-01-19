@@ -1,1 +1,1 @@
-# BengalICharacterRecognition
+# Bengali Character Recognition
