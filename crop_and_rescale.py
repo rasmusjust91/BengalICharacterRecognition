@@ -1,15 +1,3 @@
-import numpy as np
-import pandas as pd
-import matplotlib.pyplot as plt
-from matplotlib.patches import Rectangle
-import cv2
-import os
-
-HEIGHT = 137
-WIDTH = 236
-SIZE = 64
-
-
 def series_to_img_reshape(df_row, height = 137, width = 236):
     '''
     DOCS
@@ -65,35 +53,7 @@ def crop_symbol(img, pad=5):
         
     return img_crop
 
-# Main script
-root = '../parquet'
-
-for file in os.listdir(root):
-    path=os.path.join(root, file)
-    if file == 'cropped':
-        continue
-    
-    print(file)
-    df = pd.read_parquet(path, 'fastparquet')
-    
-    N_images = len(df)
-    
-    images = np.zeros((N_images, SIZE**2))
-    for idx in range(N_images):
-        img = series_to_img_reshape(df.iloc[idx, 1:])
-        img_binary = img_to_binary(img)
-        img_crop = crop_symbol(img_binary)
-        resized = cv2.resize(crop_img, (SIZE, SIZE), interpolation = cv2.INTER_AREA)
-        images[idx, :] = resized.flatten()
-        if idx%500 == 0:
-            print(idx)
-
-    df_to_write = pd.DataFrame(images, columns=[str(i) for i in range(SIZE**2)])
-    if 'test' in file:
-        file_type = 'Test'
-    else:
-        file_type = 'Train'
-        
-    df_to_write.insert(0, 'image_id', [file_type+'_'+str(i) for i in range(len(df_to_write))])
-
-    df_to_write.to_parquet(os.path.join(*[root,'cropped', file]), engine='fastparquet')
+def crop_and_resize(df_row):
+    img = series_to_img_reshape(df_row, height=64, width=64)
+    img = img_to_binary(img)
+    return crop_symbol(img) 
